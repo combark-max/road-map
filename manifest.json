@@ -1,15 +1,8 @@
 {
-  "name": "생활계획표 앱",
+  "name": "생활계획표",
   "short_name": "계획표",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
-  "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ]
+  "theme_color": "#4CAF50"
 }
