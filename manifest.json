@@ -1,8 +1,12 @@
 {
-  "name": "생활계획표",
-  "short_name": "계획표",
-  "start_url": ".",
+  "name": "明's Life",
+  "short_name": "Life",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4CAF50"
+  "theme_color": "#ff6666",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
 }
