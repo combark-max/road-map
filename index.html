@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="manifest.json">
 <title>明 Life - 생활계획표</title>
 <style>
   :root { --main-p: #6C63E0; --bg: #F8F6FF; --accent: #FF5252; }
@@ -13,39 +12,35 @@
   body, html { margin: 0; padding: 0; height: 100%; background: #1a1040; overflow: hidden; }
   #app { max-width: 430px; height: 100%; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; position: relative; }
 
-  /* 비밀번호 화면 */
+  /* 비밀번호 잠금 */
   #lock-screen { position: absolute; inset: 0; background: var(--main-p); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
   #lock-screen input { width: 180px; padding: 15px; border-radius: 12px; border: none; text-align: center; font-size: 20px; margin: 20px 0; letter-spacing: 5px; outline: none; }
-  #lock-screen button { padding: 12px 40px; border-radius: 10px; border: none; background: white; color: var(--main-p); font-weight: bold; font-size: 16px; }
+  #lock-screen button { padding: 12px 40px; border-radius: 10px; border: none; background: white; color: var(--main-p); font-weight: bold; }
 
-  /* 상단 헤더 */
-  .header { background: var(--main-p); padding: env(safe-area-inset-top, 20px) 20px 15px; color: white; flex-shrink: 0; transition: all 0.3s; }
+  /* 헤더 */
+  .header { background: var(--main-p); padding: env(safe-area-inset-top, 20px) 20px 15px; color: white; flex-shrink: 0; }
   .header h1 { font-size: 20px; margin: 0; display: flex; align-items: center; gap: 5px; }
   .header .ming { color: var(--accent); font-weight: 800; }
   .tabs { display: flex; background: rgba(255,255,255,0.15); border-radius: 25px; margin-top: 15px; padding: 3px; }
-  .tab { flex: 1; padding: 8px; text-align: center; color: rgba(255,255,255,0.7); font-size: 13px; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+  .tab { flex: 1; padding: 8px; text-align: center; color: rgba(255,255,255,0.7); font-size: 13px; border-radius: 20px; cursor: pointer; }
   .tab.active { background: white; color: var(--main-p); font-weight: bold; }
 
-  /* 중앙 컨텐츠 */
+  /* 컨텐츠 */
   .content { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
-  .view { display: none; height: 100%; }
+  .view { display: none; }
   .view.active { display: block; }
 
-  /* 리스트 아이템 디자인 */
-  .empty-msg { text-align: center; color: #AAA; margin-top: 100px; line-height: 1.6; }
-  .plan-card { background: white; border-radius: 15px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; }
+  /* 계획 리스트 카드 */
+  .plan-card { background: white; border-radius: 15px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .plan-info h3 { margin: 0; font-size: 16px; color: #333; }
   .plan-info p { margin: 4px 0 0; font-size: 12px; color: #888; }
+  .delete-btn { color: #DDD; padding: 5px; font-size: 18px; }
 
-  /* 추가 버튼 */
-  .add-btn { position: fixed; right: 20px; bottom: 100px; width: 60px; height: 60px; background: var(--main-p); border-radius: 50%; color: white; font-size: 32px; border: none; box-shadow: 0 5px 15px rgba(108,99,224,0.4); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  /* 추가 버튼 (우측 하단 고정) */
+  .add-btn { position: fixed; right: 25px; bottom: 100px; width: 60px; height: 60px; background: var(--main-p); border-radius: 50%; color: white; font-size: 35px; border: none; box-shadow: 0 5px 15px rgba(108,99,224,0.4); z-index: 999; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-  /* 설정 메뉴 */
-  .setting-group { margin-bottom: 20px; }
-  .setting-item { background: white; padding: 18px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 14px; }
-  .setting-item.danger { color: var(--accent); font-weight: bold; }
-
-  /* 하단 네비게이션 */
+  /* 하단 네비 */
   .nav { height: calc(65px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #EEE; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); flex-shrink: 0; }
   .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #BBB; font-size: 10px; cursor: pointer; flex: 1; }
   .nav-item.active { color: var(--main-p); }
@@ -54,27 +49,27 @@
   /* 모달 */
   .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; display: none; align-items: flex-end; }
   .modal-overlay.active { display: flex; }
-  .modal { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal h2 { font-size: 18px; margin-bottom: 20px; text-align: center; color: #333; }
-  .modal input { width: 100%; padding: 14px; border: 1px solid #EEE; border-radius: 12px; margin-bottom: 15px; background: #F9F9F9; outline: none; }
+  .modal { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; transform: translateY(0); }
+  .modal input { width: 100%; padding: 14px; border: 1px solid #EEE; border-radius: 12px; margin-bottom: 15px; background: #F9F9F9; outline: none; font-size: 16px; }
   .modal-btns { display: flex; gap: 10px; }
-  .modal-btns button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
-  .btn-save { background: var(--main-p); color: white; }
+  .modal-btns button { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; }
+
+  /* 설정 */
+  .setting-item { background: white; padding: 18px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 </style>
 </head>
 <body>
 
 <div id="app">
   <div id="lock-screen">
-    <h2 id="lock-msg">🔒 보안 비밀번호</h2>
-    <input type="password" id="pw-input" inputmode="numeric" pattern="[0-9]*" placeholder="****">
+    <h2 id="lock-msg">보안 비밀번호</h2>
+    <input type="password" id="pw-input" inputmode="numeric" placeholder="****">
     <button onclick="checkPassword()">확인</button>
   </div>
 
   <header class="header" id="app-header">
     <h1><span class="ming">明</span> Life 생활계획표</h1>
-    <div class="tabs" id="planner-tabs">
+    <div class="tabs">
       <div class="tab active" onclick="switchTab('today', this)">오늘</div>
       <div class="tab" onclick="switchTab('weekly', this)">주간</div>
       <div class="tab" onclick="switchTab('monthly', this)">월간</div>
@@ -84,24 +79,19 @@
 
   <main class="content">
     <div id="view-planner" class="view active">
-      <div id="data-list" class="list-container">
-        </div>
+      <div id="plan-list-container"></div>
     </div>
     <div id="view-todo" class="view">
-      <h2 style="font-size:18px; margin-bottom:15px;">할 일 목록</h2>
-      <div id="todo-list"></div>
+      <h2 style="font-size:18px; margin-bottom:15px;">할 일 체크리스트</h2>
+      <div id="todo-list-container"></div>
     </div>
     <div id="view-settings" class="view">
-      <div class="setting-group">
-        <div class="setting-item" onclick="openSettingModal('알림 설정')"><span>일정 알림 설정</span><span>〉</span></div>
-        <div class="setting-item" onclick="openSettingModal('목표 달성 알림')"><span>목표 달성 알림 설정</span><span>〉</span></div>
-        <div class="setting-item" onclick="exportData()"><span>데이터 백업 (TXT 저장)</span><span>💾</span></div>
-        <div class="setting-item danger" onclick="resetData()"><span>데이터 초기화</span><span>⚠</span></div>
-      </div>
+      <div class="setting-item" onclick="exportData()"><span>데이터 백업 (TXT)</span><span>💾</span></div>
+      <div class="setting-item" style="color:red; font-weight:bold" onclick="resetData()"><span>데이터 초기화</span><span>⚠</span></div>
     </div>
   </main>
 
-  <button class="add-btn" id="main-add-btn" onclick="openAddModal()">+</button>
+  <button class="add-btn" id="floating-add-btn" onclick="openAddModal()">+</button>
 
   <nav class="nav">
     <div class="nav-item active" onclick="navTo('planner', this)"><i>📅</i><span>계획표</span></div>
@@ -112,13 +102,11 @@
   <div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <h2 id="modal-title">계획 추가</h2>
-      <div id="modal-body">
-        <input type="text" id="input-title" placeholder="무엇을 할까요?">
-        <input type="time" id="input-time">
-      </div>
+      <input type="text" id="input-title" placeholder="무엇을 계획하시나요?">
+      <input type="time" id="input-time">
       <div class="modal-btns">
-        <button style="background:#F0F0F0; color:#666;" onclick="closeModal()">취소</button>
-        <button class="btn-save" onclick="saveNewItem()">저장하기</button>
+        <button style="background:#F0F0F0" onclick="closeModal()">취소</button>
+        <button style="background:var(--main-p); color:white" onclick="saveItem()">저장</button>
       </div>
     </div>
   </div>
@@ -129,80 +117,68 @@
   let currentView = 'planner';
   let savedPw = localStorage.getItem('app_password');
 
-  // 1. 초기 비밀번호 설정 및 체크
-  window.onload = () => {
-    if (!savedPw) {
-      document.getElementById('lock-msg').textContent = "신규 비밀번호 설정";
-    }
-    document.getElementById('lock-screen').style.display = 'flex';
-    renderContent();
-  };
+  // 비밀번호 처리
+  if (!savedPw) document.getElementById('lock-msg').textContent = "초기 비밀번호 설정";
+  document.getElementById('lock-screen').style.display = 'flex';
 
   function checkPassword() {
-    const input = document.getElementById('pw-input').value;
+    const val = document.getElementById('pw-input').value;
     if (!savedPw) {
-      if(input.length < 4) return alert("4자리 이상 입력하세요.");
-      localStorage.setItem('app_password', input);
-      alert("설정 완료!");
+      if(val.length < 4) return alert("4자리 이상 입력!");
+      localStorage.setItem('app_password', val);
       location.reload();
-    } else if (input === savedPw) {
+    } else if (val === savedPw) {
       document.getElementById('lock-screen').style.display = 'none';
     } else {
-      alert("비밀번호가 틀립니다.");
-      document.getElementById('pw-input').value = '';
+      alert("비밀번호 오류");
     }
   }
 
-  // 2. 뷰 및 탭 전환 로직
+  // 네비게이션 및 탭 전환
   function navTo(view, el) {
     currentView = view;
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + view).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
-
-    // UI 조정
     document.getElementById('app-header').style.display = (view === 'planner') ? 'block' : 'none';
-    document.getElementById('main-add-btn').style.display = (view === 'settings') ? 'none' : 'flex';
-    
-    history.pushState({view: view}, '');
-    renderContent();
+    document.getElementById('floating-add-btn').style.display = (view === 'settings') ? 'none' : 'flex';
+    renderPlans();
   }
 
   function switchTab(tab, el) {
     currentTab = tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    renderContent();
+    renderPlans();
   }
 
-  // 3. 내용 렌더링 (핵심!)
-  function renderContent() {
-    const container = document.getElementById('data-list');
+  // 데이터 렌더링
+  function renderPlans() {
+    const container = document.getElementById('plan-list-container');
     container.innerHTML = '';
-    
-    // 로컬스토리지에서 데이터 가져오기 (없으면 빈 배열)
     const items = JSON.parse(localStorage.getItem('plans_' + currentTab) || '[]');
 
     if (items.length === 0) {
-      container.innerHTML = `<div class="empty-msg">📅 ${currentTab.toUpperCase()} 계획이 없습니다.<br>아래 + 버튼을 눌러 추가하세요!</div>`;
+      container.innerHTML = `<div style="text-align:center; color:#AAA; margin-top:100px;">
+        📅 ${currentTab.toUpperCase()} 계획이 없습니다.<br>오른쪽 아래 + 버튼을 눌러보세요!</div>`;
     } else {
-      items.forEach((item, index) => {
+      items.forEach((item, idx) => {
         container.innerHTML += `
           <div class="plan-card">
             <div class="plan-info">
               <h3>${item.title}</h3>
-              <p>⏰ ${item.time || '시간 미설정'}</p>
+              <p>⏰ ${item.time || '시간 미지정'}</p>
             </div>
-            <div style="color:#CCC" onclick="deleteItem(${index})">✕</div>
+            <div class="delete-btn" onclick="deleteItem(${idx})">✕</div>
           </div>`;
       });
     }
   }
 
-  // 4. 모달 및 저장/삭제 기능
+  // 모달 및 저장
   function openAddModal() {
-    document.getElementById('modal-title').textContent = `${currentTab.toUpperCase()} 계획 추가`;
+    document.getElementById('modal-title').textContent = currentTab.toUpperCase() + " 계획 추가";
     document.getElementById('modal-overlay').classList.add('active');
     history.pushState({modal: 'open'}, '');
   }
@@ -211,63 +187,48 @@
     document.getElementById('modal-overlay').classList.remove('active');
   }
 
-  function saveNewItem() {
+  function saveItem() {
     const title = document.getElementById('input-title').value;
     const time = document.getElementById('input-time').value;
-    if (!title) return alert("내용을 입력하세요!");
+    if(!title) return alert("내용을 입력하세요");
 
     const key = 'plans_' + currentTab;
     const items = JSON.parse(localStorage.getItem(key) || '[]');
-    items.push({ title, time });
+    items.push({title, time});
     localStorage.setItem(key, JSON.stringify(items));
     
     document.getElementById('input-title').value = '';
     closeModal();
-    renderContent();
+    renderPlans();
   }
 
-  function deleteItem(index) {
-    if(!confirm("삭제할까요?")) return;
+  function deleteItem(idx) {
+    if(!confirm("삭제하시겠습니까?")) return;
     const key = 'plans_' + currentTab;
     let items = JSON.parse(localStorage.getItem(key));
-    items.splice(index, 1);
+    items.splice(idx, 1);
     localStorage.setItem(key, JSON.stringify(items));
-    renderContent();
+    renderPlans();
   }
 
-  // 5. 이전 버튼(뒤로가기) 대응
-  window.onpopstate = function() {
-    if (document.getElementById('modal-overlay').classList.contains('active')) {
-      closeModal();
-    } else if (currentView !== 'planner') {
-      navTo('planner', document.querySelector('.nav-item'));
-    }
+  // 뒤로가기 제어
+  window.onpopstate = () => {
+    if (document.getElementById('modal-overlay').classList.contains('active')) closeModal();
   };
 
-  // 6. 설정 기능 (백업/초기화)
   function exportData() {
-    const data = JSON.stringify(localStorage);
-    const blob = new Blob([data], {type: "text/plain"});
+    const blob = new Blob([JSON.stringify(localStorage)], {type: "text/plain"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "MingLife_Backup.txt";
     a.click();
-    alert("데이터가 백업 파일로 저장되었습니다.");
   }
 
   function resetData() {
-    if(confirm("모든 데이터(비밀번호 포함)가 초기화됩니다. 계속할까요?")) {
-      localStorage.clear();
-      location.reload();
-    }
+    if(confirm("모든 데이터를 삭제할까요?")) { localStorage.clear(); location.reload(); }
   }
 
-  function openSettingModal(t) {
-    document.getElementById('modal-title').textContent = t;
-    document.getElementById('modal-body').innerHTML = `<p style='text-align:center'>알림 기능을 활성화하시겠습니까?</p>`;
-    document.getElementById('modal-overlay').classList.add('active');
-  }
+  renderPlans(); // 초기 실행
 </script>
-
 </body>
 </html>
