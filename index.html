@@ -2,158 +2,191 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>明's Life</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#6C63E0">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>明 Life - 생활계획표</title>
 <style>
-body { margin:0; font-family:sans-serif; text-align:center; }
-.screen { display:none; padding:20px; }
-.active { display:block; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;width:100%;overflow:hidden;background:#1a1040;font-family:'Noto Sans KR',sans-serif}
+#app{max-width:430px;height:100%;margin:0 auto;background:#F8F6FF;display:flex;flex-direction:column;position:relative;overflow:hidden}
 
-.keypad button {
-  width:70px; height:70px; margin:5px;
-  font-size:24px; border-radius:50%;
-}
+/* 잠금 화면 */
+#lock-screen{position:absolute;inset:0;background:#6C63E0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;padding:20px;text-align:center}
+#lock-screen h2{margin-bottom:10px;font-size:20px}
+#lock-screen input{width:160px;padding:12px;border-radius:10px;border:none;text-align:center;font-size:18px;margin-bottom:15px;letter-spacing:5px}
+#lock-screen button{padding:10px 30px;border-radius:10px;border:none;background:white;color:#6C63E0;font-weight:700;cursor:pointer}
 
-.tabs button { margin:5px; padding:10px; }
+/* 상단바 및 탭 */
+.sbar{background:#6C63E0;padding:env(safe-area-inset-top,10px) 16px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.sbar span{color:white;font-size:11px}
+.topbar{background:#6C63E0;padding:6px 16px 14px;flex-shrink:0}
+.app-title{display:flex;align-items:baseline;gap:5px}
+.t-ming{color:#e53935;font-size:22px;font-weight:700}
+.t-life{color:white;font-size:16px}
+.tabs-wrap{margin-top:11px;border-radius:22px;padding:3px;display:flex;gap:2px;background:rgba(255,255,255,.15)}
+.tab{flex:1;padding:6px 0;border-radius:18px;font-size:11px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.65);text-align:center}
+.tab.active{background:white;color:#6C63E0;font-weight:bold}
 
-.todo { text-align:left; margin:10px; }
+/* 설정 화면 스타일 */
+.setting-item{background:white;padding:16px;border-bottom:.5px solid #eee;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.setting-item:active{background:#f0f0f0}
+.setting-item span{font-size:14px;color:#333}
+.setting-item.danger span{color:#e53935;font-weight:bold}
 
-.circle {
-  width:120px; height:120px; border-radius:50%;
-  border:10px solid lightgray;
-  position:relative; margin:auto;
-}
-.fill {
-  position:absolute; top:0; left:0;
-  width:100%; height:100%;
-  border-radius:50%;
-  clip:rect(0,120px,120px,60px);
-}
+/* 모달 */
+.modal-bg{display:none;position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end}
+.modal-bg.open{display:flex}
+.modal{background:white;border-radius:20px 20px 0 0;width:100%;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 20px)}
+.modal-title{font-size:15px;font-weight:bold;margin-bottom:15px;text-align:center}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.btn-c{flex:1;padding:12px;border:1px solid #ddd;border-radius:10px;background:white}
+.btn-s{flex:1;padding:12px;border:none;border-radius:10px;background:#6C63E0;color:white}
+
+.content{flex:1;overflow-y:auto;background:#F8F6FF}
+.sv{display:none;padding:20px}.sv.show{display:block}
+
+/* 하단 네비 */
+.bnav{display:flex;justify-content:space-around;padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 6px);border-top:.5px solid #e0e0e0;background:white}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:0.4}
+.bnav-item.active{opacity:1;color:#6C63E0}
+.bnav-lbl{font-size:10px}
 </style>
 </head>
 <body>
+<div id="app">
+  <div id="lock-screen" style="display:none;">
+    <h2 id="lock-msg">비밀번호</h2>
+    <input type="password" id="pw-input" inputmode="numeric" pattern="[0-9]*" placeholder="****">
+    <button id="pw-btn">확인</button>
+  </div>
 
-<!-- 비밀번호 -->
-<div id="lock" class="screen active">
-<h2>🔒 비밀번호</h2>
-<div id="dots"></div>
-<div class="keypad" id="keys"></div>
-<button onclick="del()">지우기</button>
-</div>
+  <div class="sbar"><span>10:38</span><span>明 Life</span></div>
+  <div class="topbar">
+    <div class="app-title"><span class="t-ming">明</span><span class="t-life">Life 생활계획표</span></div>
+    <div class="tabs-wrap">
+      <button class="tab active" onclick="switchTab('today')">오늘</button>
+      <button class="tab" onclick="switchTab('weekly')">주간</button>
+      <button class="tab" onclick="switchTab('monthly')">월간</button>
+      <button class="tab" onclick="switchTab('yearly')">년간</button>
+    </div>
+  </div>
 
-<!-- 메인 -->
-<div id="main" class="screen">
-<h2>📅 明's Life</h2>
-<div id="date"></div>
+  <div class="content">
+    <div id="sv-main" class="sv show">플래너 화면입니다.</div>
+    
+    <div id="sv-settings" class="sv">
+      <div class="setting-item" onclick="openNotifyModal('일정 알림')"><span>일정 알림 설정</span><span>〉</span></div>
+      <div class="setting-item" onclick="openNotifyModal('목표 달성 알림')"><span>목표 달성 알림 설정</span><span>〉</span></div>
+      <div class="setting-item" onclick="exportData()"><span>데이터 백업 (TXT 저장)</span><span>💾</span></div>
+      <div class="setting-item danger" onclick="resetData()"><span>데이터 초기화</span><span>⚠</span></div>
+    </div>
+  </div>
 
-<div class="tabs">
-<button onclick="setTab('today')">오늘</button>
-<button onclick="setTab('week')">주간</button>
-<button onclick="setTab('month')">월간</button>
-<button onclick="setTab('year')">년간</button>
-</div>
+  <div class="modal-bg" id="modal-bg">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">알림 설정</div>
+      <div id="modal-body"></div>
+      <div class="modal-btns">
+        <button class="btn-c" onclick="closeModal()">닫기</button>
+        <button class="btn-s" onclick="closeModal()">저장</button>
+      </div>
+    </div>
+  </div>
 
-<div id="list"></div>
-
-<h3>🎯 달성률</h3>
-<div id="percent">0%</div>
-
-<button onclick="add()">➕</button>
+  <div class="bnav">
+    <div class="bnav-item active" id="nav-p" onclick="showNav('main')">📅<div class="bnav-lbl">계획표</div></div>
+    <div class="bnav-item" onclick="alert('할 일 목록 준비중')">✅<div class="bnav-lbl">할 일</div></div>
+    <div class="bnav-item" id="nav-s" onclick="showNav('settings')">⚙️<div class="bnav-lbl">설정</div></div>
+  </div>
 </div>
 
 <script>
-let pass = localStorage.getItem("pass") || "";
-let input = "";
-
-function renderDots(){
-  document.getElementById("dots").innerHTML =
-    "●".repeat(input.length);
-}
-
-function makeKeys(){
-  let k="";
-  for(let i=1;i<=9;i++){
-    k+=`<button onclick="press(${i})">${i}</button>`;
+/* [1] 안드로이드/휴대폰 이전 버튼 대응 */
+history.pushState({page: 'main'}, '', '');
+window.onpopstate = function(event) {
+  if (document.getElementById('modal-bg').classList.contains('open')) {
+    closeModal();
+    history.pushState({page: 'main'}, '', ''); // 상태 복구
+  } else {
+    showNav('main');
   }
-  k+=`<button onclick="press(0)">0</button>`;
-  document.getElementById("keys").innerHTML=k;
-}
-makeKeys();
+};
 
-function press(n){
-  input+=n;
-  renderDots();
-  if(input.length===6){
-    if(!pass){
-      localStorage.setItem("pass", input);
-      pass=input;
-      enter();
-    }else{
-      if(input===pass) enter();
-      else { alert("틀림"); input=""; renderDots(); }
-    }
+/* [2] 비밀번호 로직 */
+const lockScreen = document.getElementById('lock-screen');
+const pwInput = document.getElementById('pw-input');
+let savedPw = localStorage.getItem('app_password');
+
+if (!savedPw) {
+  lockScreen.style.display = 'flex';
+  document.getElementById('lock-msg').textContent = "비밀번호 초기 설정";
+} else {
+  lockScreen.style.display = 'flex';
+}
+
+document.getElementById('pw-btn').onclick = () => {
+  if (!savedPw) {
+    localStorage.setItem('app_password', pwInput.value);
+    savedPw = pwInput.value;
+    lockScreen.style.display = 'none';
+  } else if (pwInput.value === savedPw) {
+    lockScreen.style.display = 'none';
+  } else {
+    alert("틀렸습니다.");
+  }
+};
+
+/* [3] 네비게이션 및 탭 전환 */
+function showNav(id) {
+  document.querySelectorAll('.sv').forEach(s => s.classList.remove('show'));
+  document.getElementById('sv-' + id).classList.add('show');
+  document.querySelectorAll('.bnav-item').forEach(n => n.classList.remove('active'));
+  if(id === 'settings') document.getElementById('nav-s').classList.add('active');
+  else document.getElementById('nav-p').classList.add('active');
+}
+
+function switchTab(type) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('sv-main').textContent = type.toUpperCase() + " 계획 리스트 화면";
+}
+
+/* [4] 설정 세부 기능 */
+function openNotifyModal(title) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="padding:10px 0;">
+      <label style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        푸시 알림 사용 <input type="checkbox" checked>
+      </label>
+      <label>알림 시간: <input type="time" value="09:00" style="width:100%; padding:10px; margin-top:5px;"></label>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+}
+
+function exportData() {
+  const data = JSON.stringify(localStorage);
+  const blob = new Blob([data], {type: "text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ming_life_backup.txt";
+  a.click();
+  alert("데이터가 txt 파일로 백업되었습니다.");
+}
+
+function resetData() {
+  if (confirm("모든 일정과 비밀번호가 삭제됩니다. 정말 초기화할까요?")) {
+    localStorage.clear();
+    location.reload();
   }
 }
-
-function del(){
-  input=input.slice(0,-1);
-  renderDots();
-}
-
-function enter(){
-  document.getElementById("lock").classList.remove("active");
-  document.getElementById("main").classList.add("active");
-  load();
-}
-
-let tab="today";
-
-function setTab(t){
-  tab=t;
-  load();
-}
-
-function load(){
-  let data = JSON.parse(localStorage.getItem(tab)||"[]");
-  let html="";
-  let done=0;
-
-  data.forEach((d,i)=>{
-    if(d.done) done++;
-    html+=`
-    <div class="todo">
-      <input type="checkbox" ${d.done?"checked":""}
-      onclick="toggle(${i})">
-      ${d.text}
-    </div>`;
-  });
-
-  document.getElementById("list").innerHTML=html;
-
-  let p = data.length ? Math.round(done/data.length*100) : 0;
-  document.getElementById("percent").innerText=p+"%";
-}
-
-function add(){
-  let t = prompt("계획 입력");
-  if(!t) return;
-  let data = JSON.parse(localStorage.getItem(tab)||"[]");
-  data.push({text:t,done:false});
-  localStorage.setItem(tab, JSON.stringify(data));
-  load();
-}
-
-function toggle(i){
-  let data = JSON.parse(localStorage.getItem(tab));
-  data[i].done=!data[i].done;
-  localStorage.setItem(tab, JSON.stringify(data));
-  load();
-}
-
-document.getElementById("date").innerText =
-  new Date().toLocaleDateString();
 </script>
-
 </body>
 </html>
